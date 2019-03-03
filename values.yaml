@@ -1,0 +1,27 @@
+## Images
+image:
+  registry: gcr.io
+  repository: google-samples/microservices-demo/recommendationservice
+  tag: v0.1.0
+  pullPolicy: Always
+  port: 8080
+  cmd: ["/bin/grpc_health_probe", "-addr=:8080"]
+
+global:
+  imageRegistry: gcr.io
+  name: recommendationservice
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 220Mi
+  limits:
+    cpu: 200m
+    memory: 450Mi
+
+service:
+  type: ClusterIP
+  ports:
+    - name: grpc
+      port: 8080
+      targetPort: 8080
