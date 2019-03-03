@@ -1,0 +1,43 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ .Values.global.name }}
+spec:
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.global.name }}
+        release: {{ .Release.Name }}
+        heritage: {{ .Release.Service }}
+    spec:
+      terminationGracePeriodSeconds: 5
+      containers:
+      - name: server
+        image: {{ template "recommendationservice.image" . }}
+        ports:
+        - containerPort: {{ .Values.image.port }}
+        env:
+        - name: PRODUCT_CATALOG_SERVICE_ADDR
+          value: "productcatalogservice:3550"
+        readinessProbe:
+          periodSeconds: 5
+          exec:
+            command: ["/bin/grpc_health_probe", "-addr=:8080"]
+        livenessProbe:
+          periodSeconds: 5
+          exec:
+            command: ["/bin/grpc_health_probe", "-addr=:8080"]
+        resources:
+{{ toYaml .Values.resources | indent 10 }}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.global.name }}
+spec:
+  type: {{ .Values.service.type }}
+  selector:
+    app: {{ .Values.global.name }}
+  ports:
+{{ toYaml .Values.service.ports | indent 2 }}
